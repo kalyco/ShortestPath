@@ -11,6 +11,7 @@ template <typename T>
 class Heap {
 
  public:
+  // Array<T> pos; // for updating weight
 
   Heap(int aLen) : hA(aLen+1), mLen(0)
   {}
@@ -33,6 +34,9 @@ class Heap {
     T result = hA[1];
     hA[1] = hA[mLen];
     mLen--;
+    //   // Update position of last node
+    // pos[result] = mLen;
+    // pos[mLen] = 0;
     bubbleDown(1);
     return result;
   }
@@ -71,37 +75,62 @@ class Heap {
     return (mLen == 0);
   }
 
+  void updateKey(T n, int dist) {
+    for (int i=0; i < mLen; i++) {
+      if (hA[i] == n) {
+        hA[i]->setShortestDistance(dist);
+      }   
+    }
+  }
+
+  // void decreaseKey(int v, int dist) {
+  //   int i = pos[v];
+  //   hA[i]->setShortestDistance(dist);
+
+  //   // Travel up while the complete tree is not heapified.
+  //   // This is a O(Logn) loop
+  //   while (i && hA[i]->getShortestDistance() < hA[(i - 1) / 2]->getShortestDistance()) {
+  //     T t = pos[hA[i]];
+  //     pos[hA[i]] = pos[hA[(i-1)/2]]; // Swap this node with its parent
+  //     pos[hA[(i-1)/2]] = t;
+  //     swapMinHeapNode(hA[i],  hA[(i - 1) / 2]);
+
+  //     // move to parent index
+  //     i = (i - 1) / 2;
+  //   }
+  // }
+
  private:
   // Bubble down hA[j] to an appropriate place
   void bubbleDown(int j)
   {
-    int k = j * 2; 
-    while (k <= mLen) {
-      int min;
-      int nextk;
-      if (k == mLen) {
-	// No right child
-	min = hA[k]->key();
-	nextk = k;
-      } else if (hA[k]->key() < hA[k+1]->key()) {
-	min = hA[k]->key();
-	nextk = k;
-      } else {
-	// hA[k]->key() >= hA[k+1]->key()
-	min = hA[k+1]->key();
-	nextk = k+1;
-      }
-      // If parent is greater than min, swap with min
-      if (hA[j]->key() > min) {
-	// Swap hA[j] and the entry having the min key
-	T t = hA[j];
-	hA[j] = hA[nextk];
-	hA[nextk] = t;
-	// Update k for the next iteration
-	j = nextk;
-	k = nextk * 2;
-      } else {
-	break;
+  int k = j * 2; 
+  while (k <= mLen) {
+    int min;
+    int nextk;
+    if (k == mLen) {
+  	// No right child
+    	min = hA[k]->key();
+    	nextk = k;
+    } else if (hA[k]->key() < hA[k+1]->key()) {
+	    min = hA[k]->key();
+	    nextk = k;
+    } else {
+	    // hA[k]->key() >= hA[k+1]->key()
+	    min = hA[k+1]->key();
+	    nextk = k+1;
+    }
+    // If parent is greater than min, swap with min
+    if (hA[j]->key() > min) {
+	  // Swap hA[j] and the entry having the min key
+	    T t = hA[j];
+	    hA[j] = hA[nextk];
+	    hA[nextk] = t;
+	    // Update k for the next iteration
+	    j = nextk;
+	    k = nextk * 2;
+    } else {
+      break;
       }
     }
   }

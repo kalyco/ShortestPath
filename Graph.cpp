@@ -1,4 +1,6 @@
-
+#include <fstream>
+#include <set>
+#include <utility> // for pair
 #include "Graph.h"
 #include "Heap.h"
 
@@ -43,16 +45,20 @@ void Graph::outputEdges(std::ostream& s) const
 
 void Graph::output(std::ostream& s) const
 {
+  ofstream ofs("graph.dot");
+  streambuf* strm_buffer = s.rdbuf(); // save output buffer of the stream
+  s.rdbuf (ofs.rdbuf()); // redirect ouput into the file
   s << "digraph{" << std::endl;
   outputNodes(s);
   outputEdges(s);
   s << "}" << std::endl;
+  s.rdbuf (strm_buffer);
 }
 
 void Graph::initializeShortestPath(int aStartNodeId)
 {
   for (const SLLNode<Node*>* curr = mNodes.head();
-       curr != NULL; curr = curr->next()) {
+    curr != NULL; curr = curr->next()) {
     Node* currNode = curr->value();
     currNode->setShortestDistance(INFINITY);
     currNode->setShortestParent(NULL);
@@ -61,25 +67,40 @@ void Graph::initializeShortestPath(int aStartNodeId)
   startNode->setShortestDistance(0);
 }
 
+void Graph::relax(Node* u, Edge* E) {
+  Node* v = E->sink();
+  int w = u->shortestDistance() + E->weight();
+  if (v->shortestDistance() > w) {
+    v->setShortestDistance(w);
+    v->setShortestParent(E);
+  }
+  v->setShortestParent(E);
+}
+
 void Graph::computeShortestPaths(int aNodeId)
 {
   initializeShortestPath(aNodeId);
-
   Heap<Node*> heap(numNodes());
-
-  // Insert all the nodes into the heap
+  int i = 0;
   for (const SLLNode<Node*>* curr = mNodes.head();
-       curr != NULL; curr = curr->next()) {
+    curr != NULL; curr = curr->next()) {
     Node* currNode = curr->value();
     heap.insertIgnoringHeapOrder(currNode);
+    i++;
   }
 
-  // Heapify into a min heap
   heap.bottomUpMinHeap();
 
-  // Your code goes here
-  // You can call heap.removeMin() to extract the min
-
+  while (!heap.isEmpty()) {
+    Node* u = heap.removeMin();
+    SLinkedList<Edge*>& edges = u->getEdges();
+    for (const SLLNode<Edge*>* curr = edges.head(); curr != NULL; curr = curr->next()) {
+      Node* v = curr->value()->sink();
+      Edge * E = curr->value();
+      relax(u, E);
+    }  
+    heap.bottomUpMinHeap();
+  }
 }
 
 void Graph::printDirectionsTo(Node* aNode) const
@@ -94,7 +115,6 @@ void Graph::printDirectionsTo(Node* aNode) const
   cout << "Drive for " << parentEdge->weight() << " meters";
   cout << " on " << parentEdge->name() << endl;
 }
-
 
 Graph::~Graph()
 {
@@ -115,5 +135,5 @@ Graph::~Graph()
 std::ostream& operator<<(std::ostream& s, const Graph& g)
 {
   g.output(s);
+  return s;
 }
-
