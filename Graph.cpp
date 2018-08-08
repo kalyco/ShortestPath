@@ -74,19 +74,16 @@ void Graph::relax(Node* u, Edge* E) {
     v->setShortestDistance(w);
     v->setShortestParent(E);
   }
-  v->setShortestParent(E);
 }
 
 void Graph::computeShortestPaths(int aNodeId)
 {
   initializeShortestPath(aNodeId);
   Heap<Node*> heap(numNodes());
-  int i = 0;
   for (const SLLNode<Node*>* curr = mNodes.head();
     curr != NULL; curr = curr->next()) {
     Node* currNode = curr->value();
     heap.insertIgnoringHeapOrder(currNode);
-    i++;
   }
 
   heap.bottomUpMinHeap();
@@ -95,7 +92,6 @@ void Graph::computeShortestPaths(int aNodeId)
     Node* u = heap.removeMin();
     SLinkedList<Edge*>& edges = u->getEdges();
     for (const SLLNode<Edge*>* curr = edges.head(); curr != NULL; curr = curr->next()) {
-      Node* v = curr->value()->sink();
       Edge * E = curr->value();
       relax(u, E);
     }  

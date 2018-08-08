@@ -113,11 +113,7 @@ class Graph {
   
  private:
 
-  // The sum of the weights of its constituent edges
-  int weight(Node* source, Node* dest);
-  // Test whether we can improve the shortest path to V found so far
-  // by going through u, and if so, update the estimate (v.d) and the parent (v.p)
-  void relax(Node* u, Edge* E);
+    void relax(Node* u, Edge* E);
   void initializeShortestPath(int aStartNodeId);
  
   void outputNodes(std::ostream& s) const;
